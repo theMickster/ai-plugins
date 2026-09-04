@@ -69,6 +69,55 @@ The Jira Agile (Software) endpoints behind `list_boards`, `get_sprints`, and `ge
 | `read:issue-details:jira`        | `get_sprint_issues` (issue fields)        |
 | `read:jql:jira`                  | `get_sprint_issues` (sprint issue lookup) |
 
+## Using with Other MCP Clients
+
+The bundled MCP server (`mcp/bitwarden-atlassian-mcp-server/start.sh`) is a plain stdio server with no Claude dependency — it only reads the `ATLASSIAN_*` environment variables above at runtime. Claude Code launches it via `.mcp.json`, which resolves `${CLAUDE_PLUGIN_ROOT}` through Claude Code's own plugin loader. Other MCP-capable tools don't know that variable, but they can launch the identical script by absolute path.
+
+Substitute the absolute path to wherever you cloned this repo in the snippets below.
+
+### GitHub Copilot CLI
+
+Add to `~/.copilot/mcp-config.json`:
+
+```json
+{
+  "mcpServers": {
+    "bitwarden-atlassian": {
+      "type": "local",
+      "command": "bash",
+      "args": [
+        "/absolute/path/to/ai-plugins/plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/start.sh"
+      ],
+      "tools": ["*"],
+      "env": {
+        "ATLASSIAN_CLOUD_ID": "your-cloud-id",
+        "ATLASSIAN_EMAIL": "your-email@company.com",
+        "ATLASSIAN_JIRA_READ_ONLY_TOKEN": "your-jira-scoped-token",
+        "ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN": "your-confluence-scoped-token"
+      }
+    }
+  }
+}
+```
+
+### OpenAI Codex CLI
+
+Add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.bitwarden-atlassian]
+command = "bash"
+args = ["/absolute/path/to/ai-plugins/plugins/bitwarden-atlassian-tools/mcp/bitwarden-atlassian-mcp-server/start.sh"]
+
+[mcp_servers.bitwarden-atlassian.env]
+ATLASSIAN_CLOUD_ID = "your-cloud-id"
+ATLASSIAN_EMAIL = "your-email@company.com"
+ATLASSIAN_JIRA_READ_ONLY_TOKEN = "your-jira-scoped-token"
+ATLASSIAN_CONFLUENCE_READ_ONLY_TOKEN = "your-confluence-scoped-token"
+```
+
+Neither tool auto-installs from this repo the way Claude Code's plugin marketplace does — edit these paths by hand. The Jira/Confluence skills and this plugin's marketplace listing remain Claude Code features; only the MCP tools themselves are portable. Also note the Usage section below names tools as `mcp__bitwarden-atlassian__<tool_name>` — that `mcp__` prefix is Claude Code's own naming convention. Other clients expose the same tools under their own naming (e.g. bare `get_issue`).
+
 ## MCP Tools
 
 ### Jira
@@ -179,6 +228,6 @@ Live creation requires `ATLASSIAN_JIRA_WRITE_TOKEN`; without it the skill can st
 
 ## Requirements
 
-- Claude Code with MCP support
+- Any MCP-capable tool (Claude Code, GitHub Copilot CLI, OpenAI Codex CLI — see [Using with Other MCP Clients](#using-with-other-mcp-clients)) for the MCP tools; the skills and marketplace installation require Claude Code specifically
 - Atlassian API credentials (see Installation)
 - Node.js 22+ with [Corepack](https://nodejs.org/api/corepack.html) enabled — on first run the bundled MCP server installs and builds itself with [pnpm](https://pnpm.io/installation) via Corepack

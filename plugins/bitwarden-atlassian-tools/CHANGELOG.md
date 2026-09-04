@@ -5,6 +5,12 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.1] - 2026-09-04
+
+### Fixed
+
+- **MCP server startup no longer hardcodes `${CLAUDE_PLUGIN_ROOT}` in its own logic** — the install/build/exec chain moved into a self-locating `start.sh` script, so GitHub Copilot CLI and OpenAI Codex CLI can launch the same server directly. Documented equivalent Copilot CLI and Codex CLI configuration in the README.
+
 ## [2.7.0] - 2026-08-26
 
 ### Added
