@@ -5,11 +5,32 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.7.1] - 2026-09-04
+## [2.7.4] - 2026-09-04
 
 ### Fixed
 
 - **MCP server startup no longer hardcodes `${CLAUDE_PLUGIN_ROOT}` in its own logic** — the install/build/exec chain moved into a self-locating `start.sh` script, so GitHub Copilot CLI and OpenAI Codex CLI can launch the same server directly. Documented equivalent Copilot CLI and Codex CLI configuration in the README.
+- `start.sh` now fetches Corepack through `npm` the same way the inline launch command below does, so the Copilot CLI and Codex CLI launch path doesn't regress the Corepack-availability fix from 2.7.2.
+
+## [2.7.3] - 2026-09-17
+
+### Fixed
+
+- The optional `ATLASSIAN_JIRA_WRITE_TOKEN` is no longer reported among the plugin's missing environment variables. The MCP config now declares it with an empty default, which is how an optional variable is distinguished from a required one: a read-only install intends to omit it, so listing it alongside genuinely absent configuration read as a setup failure. Whether a live write can proceed is decided by the write tools themselves, where it already was. A dry run notes the absent token in its preview, and a `dryRun: false` call refuses before opening a connection.
+
+## [2.7.2] - 2026-09-17
+
+### Fixed
+
+- The bundled MCP server now starts on Node.js releases that do not ship Corepack. The launch sequence fetches Corepack as a package through the `npm` bundled with every Node release, so the server manifest's `packageManager` field remains the single place the pnpm version is declared and its pinned integrity hash is still verified before pnpm runs.
+- First launch installs only the packages needed to build and run the server. `typescript` and `@types/node` are declared alongside the runtime dependencies because the launch compiles from source, which leaves `vitest` as the only development-time package and keeps its dependency tree out of the startup path. A package published within the registry's minimum-age window anywhere in that tree, down to a transitive dependency of the test runner's bundler, would otherwise stop the server from starting.
+- Dropped the server manifest's `devEngines.packageManager` declaration. `npm` treats a foreign package manager declared there as a hard failure and refuses to run in the directory at all, and pnpm ignores `packageManager` whenever both fields are present.
+
+## [2.7.1] - 2026-09-14
+
+### Changed
+
+- Updated the MCP server runtime dependencies: `@modelcontextprotocol/sdk` to 1.30.0, `axios` to 1.20.0, and `zod` to 4.5.4.
 
 ## [2.7.0] - 2026-08-26
 
