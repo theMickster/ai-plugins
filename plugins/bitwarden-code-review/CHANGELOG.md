@@ -5,6 +5,32 @@ All notable changes to the Bitwarden Code Review Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-10-12
+
+### Added
+
+- Documentation-parity review enrichment. When the diff touches any code with a documented ancestor scope (a `README.md`, `CLAUDE.md`, `docs/` directory, diagram source, or source-embedded doc comments in the change's ancestor chain), the `bitwarden-code-reviewer` agent now invokes `Skill(verifying-doc-parity)` during Cross-Plugin Enrichment to identify drifted in-repo docs at every documented ancestor scope of the change and to discover out-of-repo pages the change invalidates. Because the skill forks into its own subagent, the invocation passes it the diff, the PR description in PR mode, and a no-edit contract. Drift is reported as findings — the reviewer does not edit files in the PR — classified as substantive rather than as a documentation nitpick, and folded into classification and validation in Steps 3–4, applying the documentation standard's external-docs flow (work item before merge, stale marker on the page) when applicable. The dependency on the `bitwarden-doc-parity` plugin is optional; if it is not installed in the review environment, the review falls back to existing review knowledge.
+
+## [2.3.0] - 2026-10-08
+
+### Added
+
+- A CRITICAL or IMPORTANT finding raised again on a thread whose issue persists goes as a reply in that thread through `mcp__github_replies__add_reply_to_pull_request_comment`, so the thread's history stays in one place. Without that tool, without a `database_id` on the thread's first comment, or when the reply fails, it posts a new inline comment
+
+## [2.2.0] - 2026-09-28
+
+### Added
+
+- `/code-review-local` accepts `--base <ref>`, passed to the agent as a `BASE:` line and used in place of `origin/HEAD` for the local-mode diff. Local changes only; dropped with a PR target
+- The ref must match `^[A-Za-z0-9][A-Za-z0-9._/-]*$`, checked in the command turn and again in the agent. A rejected ref is No Verdict, not a fallback to `origin/HEAD`
+- A supplied ref that passes the pattern but does not resolve is also No Verdict; it skips the pending-changes fallback, which on a dirty tree would report a verdict on a scope the caller never asked for
+- Only the space-separated `--base <ref>` pair is accepted. Any other appearance of the token, `--base=<ref>` among them, is an error rather than a fall-through to the default base
+
+### Changed
+
+- Local-mode summaries name the base ref they diffed against
+- The unresolvable-base abort gives different advice for a supplied ref than for the `origin/HEAD` default, and names the remote-tracking ref in its remedy. A fetch writes no local branch, so advising a bare branch name would return the caller to the same abort
+
 ## [2.1.0] - 2026-09-04
 
 ### Added

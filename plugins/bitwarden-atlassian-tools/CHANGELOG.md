@@ -5,12 +5,29 @@ All notable changes to the Bitwarden Atlassian Tools plugin will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.7.4] - 2026-09-04
+## [2.7.7] - 2026-10-16
+
+### Changed
+
+- `start.sh` is the Codex CLI and Copilot CLI entry point for the MCP server. It reads the Corepack version from the server manifest, matching the Claude Code launch sequence.
+
+## [2.7.6] - 2026-10-12
+
+### Changed
+
+- The bundled MCP server installs its dependencies with pnpm 12. The launch sequence fetches the pnpm version pinned in the server manifest on every start, so the plugin version moves with that pin to carry it to installed copies.
+
+## [2.7.5] - 2026-10-07
 
 ### Fixed
 
-- **MCP server startup no longer hardcodes `${CLAUDE_PLUGIN_ROOT}` in its own logic** — the install/build/exec chain moved into a self-locating `start.sh` script, so GitHub Copilot CLI and OpenAI Codex CLI can launch the same server directly. Documented equivalent Copilot CLI and Codex CLI configuration in the README.
-- `start.sh` now fetches Corepack through `npm` the same way the inline launch command below does, so the Copilot CLI and Codex CLI launch path doesn't regress the Corepack-availability fix from 2.7.2.
+- `get_issue` now renders an "Issue Links" section (link type, linked issue key, summary, and status), so links such as "is blocked by" are visible. Passing `fields: ["issuelinks"]` returns them too.
+
+## [2.7.4] - 2026-09-23
+
+### Changed
+
+- The MCP launch sequence reads the Corepack version it fetches from the server manifest's `devDependencies`. Declaring Corepack as a dependency puts its version under the same update tooling as every other package, so the launch command never carries a version of its own that could drift from the one CI runs.
 
 ## [2.7.3] - 2026-09-17
 
